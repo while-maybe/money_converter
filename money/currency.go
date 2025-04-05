@@ -12,15 +12,15 @@ type Currency struct {
 }
 
 // ErrInvalidCurrencyCode is returned when the currency to parse is not a standard 3-letter code
-const ErrInvalidCurrencyCode = Error("")
+const ErrInvalidCurrencyCode = Error("invalid currency code")
 
 // ParseCurrency returns the currency associated to a name and may return ErrInvalidCurrencyCode
 func ParseCurrency(code string) (Currency, error) {
 	code = strings.ToUpper(code)
 
-	validCodeChars := regexp.MustCompile(`^[A-Z]\{3}$`)
+	validCode := regexp.MustCompile(`^[A-Z]{3}$`)
 
-	if len(code) != 3 || !validCodeChars.MatchString(code) {
+	if len(code) != 3 || !validCode.MatchString(code) {
 		return Currency{}, ErrInvalidCurrencyCode
 	}
 
