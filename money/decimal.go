@@ -15,8 +15,17 @@ type Decimal struct {
 	precision byte
 }
 
-const maxDecimal = 1e12
+const (
+	// maxDecimal value is a thousand billion, using the shortscale 10^12
+	maxDecimal = 1e12
+	// ErrInvalidDecimal is returned if the decimal is malformed.
+	ErrInvalidDecimal = Error("unable to convert the decimal")
+	// ErrTooLarge is returned if the quantity is too large - this would cause floating point precision errors
+	ErrTooLarge = Error("quantity over 10^12 is too large")
+)
 
+// ParseDecimal convert a string into its decimal representation.
+// It assumes there is up to a decimal separator, and that the separator is '.' (full stop).
 func ParseDecimal(value string) (Decimal, error) {
 	beforeSep, afterSep, _ := strings.Cut(value, ".")
 
@@ -30,13 +39,19 @@ func ParseDecimal(value string) (Decimal, error) {
 	}
 
 	precision := byte(len(afterSep))
+	result := Decimal{subunits: parsed, precision: precision}
+	result.simplify()
 
-	return Decimal{subunits: parsed, precision: precision}, nil
+	return result, nil
 }
 
-const (
-	// ErrInvalidDecimal is returned if the decimal is malformed.
-	ErrInvalidDecimal = Error("unable to convert the decimal")
-	// ErrTooLarge is returned if the quantity is too large - this would cause floating point precision errors
-	ErrTooLarge = Error("quantity over 10^12 is too large")
-)
+// simplify removes the trailing 0s after the . and decreases precision from a Decimal
+func (d *Decimal) simplify() {
+	// using %10 returns the last digit in base 10 of a number.
+	// If the precision is positive, that digit belongs to the right side of the decimal separator
+
+	for d.subunits%10 == 0 && d.precision > 0 {
+		d.subunits /= 10
+		d.precision--
+	}
+}
