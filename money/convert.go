@@ -31,7 +31,7 @@ func pow10(power byte) int64 {
 // The precision of the returned value is that of the target Currency.
 // This function does not guarantee that the output amount is supported.
 func applyExchangeRate(a Amount, target Currency, rate ExchangeRate) Amount {
-	converted := multiply(a.quantity * rate)
+	converted := multiply(a.quantity, rate)
 
 	switch {
 	case converted.precision > target.precision:
