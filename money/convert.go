@@ -4,7 +4,16 @@ import "math"
 
 // Convert applies the change rate to convert an amount to a target currency.
 func Convert(amount Amount, to Currency) (Amount, error) {
-	return Amount{}, nil
+	// convert to the target rate currency applying the fetched change rate.
+	rate := ExchangeRate{subunits: 2, precision: 0}
+	convertedValue := applyExchangeRate(amount, to, rate)
+
+	// validate the converted amount is within bounds
+	if err := convertedValue.validate(); err != nil {
+		return Amount{}, err
+	}
+
+	return convertedValue, nil
 }
 
 // ExchangeRate represents a rate to convert from a currency to another.
@@ -14,8 +23,9 @@ type ExchangeRate Decimal
 // It's optimized for small powers, and slow for unusually high powers.
 func pow10(power byte) int64 {
 	switch power {
-	case 0:
-		return 1
+	// case 0 never happens because pow10() is only called when converted.precision != target.precision in applyExchangeRate
+	// case 0:
+	// 	return 1
 	case 1:
 		return 10
 	case 2:
