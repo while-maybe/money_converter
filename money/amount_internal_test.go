@@ -25,6 +25,14 @@ func TestNewAmount(t *testing.T) {
 			currency: Currency{"EUR", 2},
 			err:      ErrTooPrecise,
 		},
+		"5.5 EUR": {
+			quantity: Decimal{55, 1},
+			currency: Currency{"EUR", 2},
+			want: Amount{
+				quantity: Decimal{550, 2},
+				currency: Currency{"EUR", 2},
+			},
+		},
 		"5.500 BHD": {
 			quantity: Decimal{5500, 3},
 			currency: Currency{"BHD", 3},
