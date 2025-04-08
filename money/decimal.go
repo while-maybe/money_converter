@@ -24,6 +24,21 @@ const (
 	ErrTooLarge = Error("quantity over 10^12 is too large")
 )
 
+// String implements Stringer and returns the decimal formatted as digits and optionally a decimal point followed by digits
+// mind the simplify method at the bottom which already has a pointer receiver
+func (d *Decimal) String() string {
+	if d.precision == 0 {
+		return fmt.Sprintf("%d", d.subunits)
+	}
+
+	centsPerUnit := pow10(d.precision)
+	frac := d.subunits % centsPerUnit
+	integer := d.subunits / centsPerUnit
+
+	decimalFormat := "%d.%0" + strconv.Itoa(int(d.precision)) + "d"
+	return fmt.Sprintf(decimalFormat, integer, frac)
+}
+
 // ParseDecimal convert a string into its decimal representation.
 // It assumes there is up to a decimal separator, and that the separator is '.' (full stop).
 func ParseDecimal(value string) (Decimal, error) {
