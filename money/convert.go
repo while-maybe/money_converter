@@ -23,9 +23,8 @@ type ExchangeRate Decimal
 // It's optimized for small powers, and slow for unusually high powers.
 func pow10(power byte) int64 {
 	switch power {
-	// case 0 never happens because pow10() is only called when converted.precision != target.precision in applyExchangeRate
-	// case 0:
-	// 	return 1
+	case 0:
+		return 1
 	case 1:
 		return 10
 	case 2:
