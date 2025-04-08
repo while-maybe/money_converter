@@ -55,7 +55,7 @@ func TestNewAmount(t *testing.T) {
 	}
 }
 
-func Test_validate(t *testing.T) {
+func TestValidate(t *testing.T) {
 	tt := map[string]struct {
 		amount Amount
 		err    error
