@@ -56,7 +56,6 @@ func TestExchangeRate(t *testing.T) {
 			got, err := tc.envelope.exchangeRate(tc.source, tc.target)
 
 			if err != tc.err {
-				// fmt.Printf("\n\ngot: %s\nwant: %s\n\n", err.Error(), tc.err.Error())
 				t.Errorf("unable to marshal: %s", err.Error())
 			}
 
