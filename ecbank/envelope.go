@@ -1,7 +1,9 @@
 package ecbank
 
 import (
+	"encoding/xml"
 	"fmt"
+	"io"
 	"moneyconverter/money"
 )
 
@@ -61,4 +63,22 @@ func (e envelope) exchangeRate(source, target string) (money.ExchangeRate, error
 	}
 
 	return money.ExchangeRate(rate), nil
+}
+
+func readRateFromResponse(source, target string, respBody io.Reader) (money.ExchangeRate, error) {
+	// read the response
+	decoder := xml.NewDecoder(respBody)
+
+	var ecbMessage envelope
+	err := decoder.Decode(&ecbMessage)
+	if err != nil {
+		return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrUnexpectedFormat, err)
+	}
+
+	rate, err := ecbMessage.exchangeRate(source, target)
+	if err != nil {
+		return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrChangeRateNotFound, err)
+	}
+
+	return rate, nil
 }
