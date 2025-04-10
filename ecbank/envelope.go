@@ -65,6 +65,7 @@ func (e envelope) exchangeRate(source, target string) (money.ExchangeRate, error
 	return money.ExchangeRate(rate), nil
 }
 
+// readRateFromResponse decodes XML response into an envelope and returns the exchange rate between given currencies
 func readRateFromResponse(source, target string, respBody io.Reader) (money.ExchangeRate, error) {
 	// read the response
 	decoder := xml.NewDecoder(respBody)
