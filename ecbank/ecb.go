@@ -1,13 +1,19 @@
 package ecbank
 
 import (
+	"encoding/xml"
 	"fmt"
 	"moneyconverter/money"
 	"net/http"
 )
 
 const (
-	ErrCallingServer = ecBankError("error calling server")
+	ErrCallingServer      = ecBankError("error calling server")
+	ErrUnexpectedFormat   = ecBankError("unexpected response format")
+	ErrChangeRateNotFound = ecBankError("couldn't find the exchange rate")
+	ErrClientSide         = ecBankError("client side error when contacting ECB")
+	ErrServerSide         = ecBankError("server side error when contacting ECB")
+	ErrUnknownStatusCode  = ecBankError("unknown status code contacting ECB")
 )
 
 // Client can call the bank to retrieve exchange rates.
@@ -24,6 +30,11 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 	if err != nil {
 		return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrServerSide, err.Error())
 	}
+
+	decoder := xml.NewDecoder(resp.Body)
+
+	var xrefMessage envelope
+	err = decoder.Decode(&xrefMessage)
 
 	return money.ExchangeRate{}, nil
 }
