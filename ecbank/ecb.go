@@ -25,11 +25,11 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 	const euroxrefURL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 
 	resp, err := http.Get(euroxrefURL)
-	defer resp.Body.Close()
 
 	if err != nil {
 		return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrServerSide, err.Error())
 	}
+	defer resp.Body.Close()
 
 	decoder := xml.NewDecoder(resp.Body)
 
