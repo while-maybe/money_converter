@@ -14,11 +14,6 @@ type Currency struct {
 // ErrInvalidCurrencyCode is returned when the currency to parse is not a standard 3-letter code
 const ErrInvalidCurrencyCode = Error("invalid currency code")
 
-// String implements Stringer.
-func (c Currency) String() string {
-	return c.code
-}
-
 // ParseCurrency returns the currency associated to a name and may return ErrInvalidCurrencyCode
 func ParseCurrency(code string) (Currency, error) {
 	code = strings.ToUpper(code)
@@ -39,4 +34,15 @@ func ParseCurrency(code string) (Currency, error) {
 	default:
 		return Currency{code: code, precision: 2}, nil
 	}
+}
+
+// String implements Stringer.
+func (c Currency) String() string {
+	return c.code
+}
+
+// ISOCode returns the 3 letter ISO code representing the currency name
+// it is useful should the String() implementation ever need to change
+func (c Currency) ISOCode() string {
+	return c.code
 }
