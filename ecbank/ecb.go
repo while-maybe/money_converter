@@ -17,13 +17,18 @@ const (
 
 // Client can call the bank to retrieve exchange rates.
 type Client struct {
+	url string
 }
 
 // FetchExchangeRate fetches the ExchangeRate for the day and returns in.
 func (c Client) FetchExchangeRate(source, target money.Currency) (money.ExchangeRate, error) {
 	const euroxrefURL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 
-	resp, err := http.Get(euroxrefURL)
+	if c.url == "" {
+		c.url = euroxrefURL
+	}
+
+	resp, err := http.Get(c.url)
 	if err != nil {
 		return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrServerSide, err.Error())
 	}
