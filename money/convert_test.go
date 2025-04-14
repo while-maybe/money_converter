@@ -6,6 +6,18 @@ import (
 	"testing"
 )
 
+// stubRate is a very simple stub for the exchangeRates.
+type stubRate struct {
+	rate string
+	err  error
+}
+
+// FetchExchangeRate implements the interface ratesFetcher with the same signature but fields are unused for tests purposes.
+func (m stubRate) FetchExchangeRate(_, _ money.Currency) (money.ExchangeRate, error) {
+	rate, _ := money.ParseDecimal(m.rate)
+	return money.ExchangeRate(rate), m.err
+}
+
 func TestConvert(t *testing.T) {
 	tt := map[string]struct {
 		amount   money.Amount
@@ -30,7 +42,10 @@ func TestConvert(t *testing.T) {
 
 	for name, tc := range tt {
 		t.Run(name, func(t *testing.T) {
-			got, err := money.Convert(tc.amount, tc.to)
+
+			stub := stubRate{rate: "2", err: nil}
+
+			got, err := money.Convert(tc.amount, tc.to, stub)
 			tc.validate(t, got, err)
 		})
 	}
