@@ -44,7 +44,6 @@ func (e envelope) exchangeRate(source, target string) (money.ExchangeRate, error
 	}
 
 	rates := e.exchangeRates()
-
 	sourceFactor, sourceFound := rates[source]
 	if !sourceFound {
 		return money.ExchangeRate{}, fmt.Errorf("failed to find the source currency %s", source)
@@ -57,7 +56,11 @@ func (e envelope) exchangeRate(source, target string) (money.ExchangeRate, error
 
 	// use a precision of 10 digits after the decimal separator.
 	// This precision should be enough as most currencies only use 5 digits
-	rate, err := money.ParseDecimal(fmt.Sprintf("%.10f", targetFactor/sourceFactor))
+	// trial and error shows 5 digits is a good precision value for currencies with more msbs like JPY or IDR with conversions between gbp to eur changing for 1_000_000 eur is circa 5eur.
+	// below is useful to troubleshoot
+	// fmt.Println(sourceFactor, targetFactor, targetFactor/sourceFactor)
+
+	rate, err := money.ParseDecimal(fmt.Sprintf("%.5f", targetFactor/sourceFactor))
 	if err != nil {
 		return money.ExchangeRate{}, fmt.Errorf("unable to parse exchange rate from %s to %s: %w", source, target, err)
 	}
