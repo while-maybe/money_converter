@@ -49,6 +49,7 @@ func ParseDecimal(value string) (Decimal, error) {
 		return Decimal{}, fmt.Errorf("%w: %s", ErrInvalidDecimal, err.Error())
 	}
 
+	// fmt.Printf("\nvalue:%s\nbefore and after: %s %s\nparsed:%d\n\n", value, beforeSep, afterSep, parsed)
 	if parsed > maxDecimal {
 		return Decimal{}, ErrTooLarge
 	}
@@ -64,7 +65,6 @@ func ParseDecimal(value string) (Decimal, error) {
 func (d *Decimal) simplify() {
 	// using %10 returns the last digit in base 10 of a number.
 	// If the precision is positive, that digit belongs to the right side of the decimal separator
-
 	for d.subunits%10 == 0 && d.precision > 0 {
 		d.subunits /= 10
 		d.precision--
