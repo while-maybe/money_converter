@@ -40,10 +40,11 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 		return money.ExchangeRate{}, err
 	}
 
+	ClearInvalidCache()
+
 	// copy the stream into a buffer and attempt to create a new cache
 	dataBuffer := bytes.NewBuffer(make([]byte, 0, 2048))
-	cache := newCache()
-	err = cache.writeCache(io.TeeReader(resp.Body, dataBuffer))
+	err = writeToCache(dataBuffer, resp.Body)
 	if err != nil {
 		return money.ExchangeRate{}, err
 	}
@@ -54,6 +55,16 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 	}
 
 	return rate, nil
+}
+
+// writeToCache creates a buffer and attempts to write to cache
+func writeToCache(buf *bytes.Buffer, data io.ReadCloser) error {
+	cache := newCache()
+	err := cache.writeCache(io.TeeReader(data, buf))
+	if err != nil {
+		return fmt.Errorf("Couldn't write to cache: %w", err)
+	}
+	return nil
 }
 
 const (
