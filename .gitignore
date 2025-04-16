@@ -200,3 +200,6 @@ main/*
 
 # Exclude build output (e.g., executables created by `go build`)
 /<project_name>
+
+# Ignore temp cache files
+mc_data_*.txt
