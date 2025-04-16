@@ -2,6 +2,7 @@ package ecbank
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"time"
@@ -14,36 +15,37 @@ type Cache struct {
 	cacheFile *os.File
 }
 
-func buildFilename(todaysDate string) string {
-	return fmt.Sprintf("mc_data_%s.txt", todaysDate)
-}
-
-func newCache() (Cache, error) {
+func newCache() *Cache {
 	dayToLive := time.Now().Format(dateLayout)
-	filename := buildFilename(dayToLive)
 
-	cacheFile, err := os.OpenFile(filename, os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return Cache{}, fmt.Errorf("Couldn't open or create file: %w", err)
+	return &Cache{
+		filename:  fmt.Sprintf("mc_data_%s.txt", dayToLive),
+		cacheFile: nil,
 	}
-	defer cacheFile.Close()
-
-	info, err := cacheFile.Stat()
-	if err != nil {
-		return Cache{}, fmt.Errorf("Couldn't get file stats: %w", err)
-	}
-
-	if info.Size() == 0 {
-		// file is empty so we write here
-	}
-
-	return Cache{
-		filename:  filename,
-		cacheFile: cacheFile,
-	}, nil
 }
 
-func ClearOld() error {
+func (c *Cache) writeCache(data io.Reader) error {
+	var err error
+	c.cacheFile, err = os.Create(c.filename)
+
+	if err != nil {
+		return fmt.Errorf("Couldn't create file: %w", err)
+	}
+	defer c.cacheFile.Close()
+
+	_, err = io.Copy(c.cacheFile, data)
+	if err != nil {
+		return fmt.Errorf("Couldn't copy data to file: %w", err)
+	}
+	return nil
+}
+
+func (c *Cache) readCache() (io.Reader, error) {
+
+	return nil, nil
+}
+
+func ClearInvalidCache() error {
 	todaysDate := time.Now().Format(dateLayout)
 	filename := fmt.Sprintf("mc_data_%s.txt", todaysDate)
 

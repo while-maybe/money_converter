@@ -1,7 +1,9 @@
 package ecbank
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"moneyconverter/money"
 	"net/http"
 )
@@ -38,7 +40,15 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 		return money.ExchangeRate{}, err
 	}
 
-	rate, err := readRateFromResponse(source.ISOCode(), target.ISOCode(), resp.Body)
+	// copy the stream into a buffer and attempt to create a new cache
+	dataBuffer := bytes.NewBuffer(make([]byte, 0, 2048))
+	cache := newCache()
+	err = cache.writeCache(io.TeeReader(resp.Body, dataBuffer))
+	if err != nil {
+		return money.ExchangeRate{}, err
+	}
+
+	rate, err := readRateFromResponse(source.ISOCode(), target.ISOCode(), dataBuffer)
 	if err != nil {
 		return money.ExchangeRate{}, err
 	}
