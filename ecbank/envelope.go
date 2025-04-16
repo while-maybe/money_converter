@@ -57,7 +57,7 @@ func (e envelope) exchangeRate(source, target string) (money.ExchangeRate, error
 	// use a precision of 10 digits after the decimal separator.
 	// This precision should be enough as most currencies only use 5 digits
 
-	rate, err := money.ParseDecimal(fmt.Sprintf("%.10f", targetFactor/sourceFactor)[:12])
+	rate, err := money.ParseDecimal(fmt.Sprintf("%.10f", targetFactor/sourceFactor)[:13])
 	if err != nil {
 		return money.ExchangeRate{}, fmt.Errorf("unable to parse exchange rate from %s to %s: %w", source, target, err)
 	}
