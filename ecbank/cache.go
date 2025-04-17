@@ -59,7 +59,7 @@ func (c *Cache) readCache(data io.Writer) error {
 }
 
 // ClearInvalidCache looks for expired cache files and deletes them
-func ClearInvalidCache() error {
+func ClearCache() error {
 	todaysDate := time.Now().Format(dateLayout)
 	filename := fmt.Sprintf("mc_data_%s.txt", todaysDate)
 

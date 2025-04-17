@@ -11,7 +11,12 @@ import (
 func main() {
 	from := flag.String("from", "", "source currency, required")
 	to := flag.String("to", "EUR", "target currency")
+	clearCache := flag.Bool("clear", true, "clears all cache")
 	flag.Parse()
+
+	if *clearCache {
+		ecbank.ClearCache()
+	}
 
 	fromCurrency, err := money.ParseCurrency(*from)
 	if err != nil {

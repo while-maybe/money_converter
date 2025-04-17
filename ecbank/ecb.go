@@ -44,8 +44,6 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 			return money.ExchangeRate{}, err
 		}
 
-		ClearInvalidCache()
-
 		err = writeToCache(dataBuffer, resp.Body)
 		if err != nil {
 			return money.ExchangeRate{}, err
