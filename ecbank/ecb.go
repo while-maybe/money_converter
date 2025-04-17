@@ -2,14 +2,18 @@ package ecbank
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"moneyconverter/money"
 	"net/http"
+	"net/url"
+	"time"
 )
 
 const (
 	ErrCallingServer      = ecBankError("error calling server")
+	ErrTimeout            = ecBankError("timed out when waiting for response")
 	ErrUnexpectedFormat   = ecBankError("unexpected response format")
 	ErrChangeRateNotFound = ecBankError("couldn't find the exchange rate")
 	ErrClientSide         = ecBankError("client side error when contacting ECB")
@@ -19,7 +23,14 @@ const (
 
 // Client can call the bank to retrieve exchange rates.
 type Client struct {
-	url string
+	client http.Client
+}
+
+// NewClient builds a client that can fetch exchange rates within a given timeout.
+func NewClient(timeout time.Duration) Client {
+	return Client{
+		client: http.Client{Timeout: timeout},
+	}
 }
 
 // FetchExchangeRate fetches the ExchangeRate for the day and returns in.
@@ -29,14 +40,16 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 
 	if err != nil {
 		fmt.Print("[API CALL] ")
-		const euroxrefURL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
+		const path = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 
-		if c.url == "" {
-			c.url = euroxrefURL
-		}
+		resp, err := c.client.Get(path)
 
-		resp, err := http.Get(c.url)
 		if err != nil {
+			var urlError *url.Error
+			if ok := errors.As(err, &urlError); ok && urlError.Timeout() {
+				return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrTimeout, err.Error())
+			}
+
 			return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrCallingServer, err.Error())
 		}
 		defer resp.Body.Close()

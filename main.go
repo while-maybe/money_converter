@@ -6,6 +6,7 @@ import (
 	"moneyconverter/ecbank"
 	"moneyconverter/money"
 	"os"
+	"time"
 )
 
 func main() {
@@ -55,7 +56,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	rates := ecbank.Client{}
+	rates := ecbank.NewClient(30 * time.Second)
 	convertedAmount, err := money.Convert(amount, toCurrency, rates)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "unable to convert %s to %s: %s.\n", amount, toCurrency, err.Error())
