@@ -15,15 +15,17 @@ type Cache struct {
 	cacheFile *os.File
 }
 
-func newCache() *Cache {
+// newCache is a constructor and it generates the filename to use
+func newCache() Cache {
 	dayToLive := time.Now().Format(dateLayout)
 
-	return &Cache{
+	return Cache{
 		filename:  fmt.Sprintf("mc_data_%s.txt", dayToLive),
 		cacheFile: nil,
 	}
 }
 
+// writeCache byte reads from given io.Reader and writes to cache file
 func (c *Cache) writeCache(data io.Reader) error {
 	var err error
 	c.cacheFile, err = os.Create(c.filename)
@@ -40,6 +42,7 @@ func (c *Cache) writeCache(data io.Reader) error {
 	return nil
 }
 
+// readCache byte reads from cache file contents and writes to given io.Reader
 func (c *Cache) readCache(data io.Writer) error {
 	var err error
 	c.cacheFile, err = os.Open(c.filename)
@@ -55,6 +58,7 @@ func (c *Cache) readCache(data io.Writer) error {
 	return nil
 }
 
+// ClearInvalidCache looks for expired cache files and deletes them
 func ClearInvalidCache() error {
 	todaysDate := time.Now().Format(dateLayout)
 	filename := fmt.Sprintf("mc_data_%s.txt", todaysDate)

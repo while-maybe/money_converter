@@ -69,6 +69,7 @@ func writeToCache(buf *bytes.Buffer, data io.ReadCloser) error {
 	return nil
 }
 
+// readFromCache creates a buffer and attempts to read from file cache
 func readFromCache(buf *bytes.Buffer) error {
 	cache := newCache()
 	err := cache.readCache(buf)
