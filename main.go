@@ -11,11 +11,15 @@ import (
 func main() {
 	from := flag.String("from", "", "source currency, required")
 	to := flag.String("to", "EUR", "target currency")
-	clearCache := flag.Bool("clear", true, "clears all cache")
+	clearCache := flag.Bool("clear", false, "clears all cache")
 	flag.Parse()
 
 	if *clearCache {
-		ecbank.ClearCache()
+		err := ecbank.ClearCache()
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "unable to clear cache files %v: %s.\n", *clearCache, err.Error())
+			os.Exit(1)
+		}
 	}
 
 	fromCurrency, err := money.ParseCurrency(*from)
@@ -23,6 +27,7 @@ func main() {
 		_, _ = fmt.Fprintf(os.Stderr, "unable to parse source currency %q: %s.\n", *from, err.Error())
 		os.Exit(1)
 	}
+
 	toCurrency, err := money.ParseCurrency(*to)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "unable to parse target currency %q: %s.\n", *to, err.Error())
