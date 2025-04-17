@@ -50,6 +50,7 @@ func (c *Cache) readCache(data io.Writer) error {
 		return fmt.Errorf("Couldn't read from cache file: %w", err)
 	}
 	defer c.cacheFile.Close()
+
 	_, err = io.Copy(data, c.cacheFile)
 	if err != nil {
 		return fmt.Errorf("Couldn't copy data to buffer: %w", err)
@@ -60,8 +61,6 @@ func (c *Cache) readCache(data io.Writer) error {
 
 // ClearInvalidCache looks for expired cache files and deletes them
 func ClearCache() error {
-	todaysDate := time.Now().Format(dateLayout)
-	filename := fmt.Sprintf("mc_data_%s.txt", todaysDate)
 
 	matches, err := filepath.Glob("mc_data_*.txt")
 	if err != nil {
@@ -69,11 +68,9 @@ func ClearCache() error {
 	}
 
 	for _, entry := range matches {
-		if entry != filename {
-			err := os.Remove(entry)
-			if err != nil {
-				return fmt.Errorf("Cache deletion error: %w", err)
-			}
+		err := os.Remove(entry)
+		if err != nil {
+			return fmt.Errorf("Cache deletion error: %w", err)
 		}
 	}
 	return nil
