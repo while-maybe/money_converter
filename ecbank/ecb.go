@@ -24,29 +24,31 @@ type Client struct {
 
 // FetchExchangeRate fetches the ExchangeRate for the day and returns in.
 func (c Client) FetchExchangeRate(source, target money.Currency) (money.ExchangeRate, error) {
-	const euroxrefURL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
-
-	if c.url == "" {
-		c.url = euroxrefURL
-	}
-
-	resp, err := http.Get(c.url)
-	if err != nil {
-		return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrCallingServer, err.Error())
-	}
-	defer resp.Body.Close()
-
-	if err = checkStatusCode(resp.StatusCode); err != nil {
-		return money.ExchangeRate{}, err
-	}
-
 	ClearInvalidCache()
+	dataBuffer := bytes.NewBuffer(make([]byte, 0, 4096))
+	err := readFromCache(dataBuffer)
 
-	// copy the stream into a buffer and attempt to create a new cache
-	dataBuffer := bytes.NewBuffer(make([]byte, 0, 2048))
-	err = writeToCache(dataBuffer, resp.Body)
 	if err != nil {
-		return money.ExchangeRate{}, err
+		const euroxrefURL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
+
+		if c.url == "" {
+			c.url = euroxrefURL
+		}
+
+		resp, err := http.Get(c.url)
+		if err != nil {
+			return money.ExchangeRate{}, fmt.Errorf("%w: %s", ErrCallingServer, err.Error())
+		}
+		defer resp.Body.Close()
+
+		if err = checkStatusCode(resp.StatusCode); err != nil {
+			return money.ExchangeRate{}, err
+		}
+
+		err = writeToCache(dataBuffer, resp.Body)
+		if err != nil {
+			return money.ExchangeRate{}, err
+		}
 	}
 
 	rate, err := readRateFromResponse(source.ISOCode(), target.ISOCode(), dataBuffer)
@@ -57,12 +59,21 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 	return rate, nil
 }
 
-// writeToCache creates a buffer and attempts to write to cache
+// writeToCache creates a buffer and attempts to write to file cache
 func writeToCache(buf *bytes.Buffer, data io.ReadCloser) error {
 	cache := newCache()
 	err := cache.writeCache(io.TeeReader(data, buf))
 	if err != nil {
 		return fmt.Errorf("Couldn't write to cache: %w", err)
+	}
+	return nil
+}
+
+func readFromCache(buf *bytes.Buffer) error {
+	cache := newCache()
+	err := cache.readCache(buf)
+	if err != nil {
+		return fmt.Errorf("Couldn't read from cache: %w", err)
 	}
 	return nil
 }
