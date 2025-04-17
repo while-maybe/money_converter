@@ -40,9 +40,19 @@ func (c *Cache) writeCache(data io.Reader) error {
 	return nil
 }
 
-func (c *Cache) readCache() (io.Reader, error) {
+func (c *Cache) readCache(data io.Writer) error {
+	var err error
+	c.cacheFile, err = os.Open(c.filename)
+	if err != nil {
+		return fmt.Errorf("Couldn't read from cache file: %w", err)
+	}
+	defer c.cacheFile.Close()
+	_, err = io.Copy(data, c.cacheFile)
+	if err != nil {
+		return fmt.Errorf("Couldn't copy data to buffer: %w", err)
+	}
 
-	return nil, nil
+	return nil
 }
 
 func ClearInvalidCache() error {
