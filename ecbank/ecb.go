@@ -24,7 +24,6 @@ type Client struct {
 
 // FetchExchangeRate fetches the ExchangeRate for the day and returns in.
 func (c Client) FetchExchangeRate(source, target money.Currency) (money.ExchangeRate, error) {
-	ClearInvalidCache()
 	dataBuffer := bytes.NewBuffer(make([]byte, 0, 4096))
 	err := readFromCache(dataBuffer)
 
@@ -44,6 +43,8 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 		if err = checkStatusCode(resp.StatusCode); err != nil {
 			return money.ExchangeRate{}, err
 		}
+
+		ClearInvalidCache()
 
 		err = writeToCache(dataBuffer, resp.Body)
 		if err != nil {
