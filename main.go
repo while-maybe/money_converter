@@ -20,6 +20,8 @@ func main() {
 			_, _ = fmt.Fprintf(os.Stderr, "unable to clear cache files %v: %s.\n", *clearCache, err.Error())
 			os.Exit(1)
 		}
+		fmt.Println("Cache cleared. Exiting...")
+		os.Exit(0)
 	}
 
 	fromCurrency, err := money.ParseCurrency(*from)

@@ -28,6 +28,7 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 	err := readFromCache(dataBuffer)
 
 	if err != nil {
+		fmt.Print("[API CALL] ")
 		const euroxrefURL = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 
 		if c.url == "" {
@@ -63,7 +64,7 @@ func writeToCache(buf *bytes.Buffer, data io.ReadCloser) error {
 	cache := newCache()
 	err := cache.writeCache(io.TeeReader(data, buf))
 	if err != nil {
-		return fmt.Errorf("Couldn't write to cache: %w", err)
+		return fmt.Errorf("couldn't write to cache: %w", err)
 	}
 	return nil
 }
@@ -73,7 +74,7 @@ func readFromCache(buf *bytes.Buffer) error {
 	cache := newCache()
 	err := cache.readCache(buf)
 	if err != nil {
-		return fmt.Errorf("Couldn't read from cache: %w", err)
+		return fmt.Errorf("couldn't read from cache: %w", err)
 	}
 	return nil
 }
