@@ -23,13 +23,13 @@ const (
 
 // Client can call the bank to retrieve exchange rates.
 type Client struct {
-	client http.Client
+	client *http.Client
 }
 
 // NewClient builds a client that can fetch exchange rates within a given timeout.
 func NewClient(timeout time.Duration) Client {
 	return Client{
-		client: http.Client{Timeout: timeout},
+		client: &http.Client{Timeout: timeout},
 	}
 }
 
@@ -40,7 +40,7 @@ func (c Client) FetchExchangeRate(source, target money.Currency) (money.Exchange
 
 	if err != nil {
 		fmt.Print("[API CALL] ")
-		const path = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
+		const path = "http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml"
 
 		resp, err := c.client.Get(path)
 
